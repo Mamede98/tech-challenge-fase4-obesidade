@@ -7,6 +7,21 @@ st.set_page_config(page_title="Sistema de Diagnóstico - Obesidade", page_icon="
 st.title("🩺 Sistema Preditivo e Analítico de Obesidade")
 st.markdown("Bem-vindo ao painel de apoio à decisão médica. Navegue pelas abas abaixo.")
 
+trad_genero = {'Feminino': 'Female', 'Masculino': 'Male'}
+trad_sim_nao = {'Sim': 'yes', 'Não': 'no'}
+trad_frequencia = {'Não': 'no', 'Às vezes': 'Sometimes', 'Frequentemente': 'Frequently', 'Sempre': 'Always'}
+trad_transporte = {'Automóvel': 'Automobile', 'Moto': 'Motorbike', 'Bicicleta': 'Bike', 'Transporte Público': 'Public_Transportation', 'A pé': 'Walking'}
+
+trad_diagnostico = {
+    'Insufficient_Weight': 'Abaixo do Peso',
+    'Normal_Weight': 'Peso Normal',
+    'Overweight_Level_I': 'Sobrepeso Grau I',
+    'Overweight_Level_II': 'Sobrepeso Grau II',
+    'Obesity_Type_I': 'Obesidade Grau I',
+    'Obesity_Type_II': 'Obesidade Grau II',
+    'Obesity_Type_III': 'Obesidade Grau III'
+}
+
 @st.cache_resource
 def load_artifacts():
     modelo = joblib.load('modelo_obesidade.pkl')
@@ -27,8 +42,7 @@ aba1, aba2 = st.tabs(["📊 Dashboard Analítico", "🤖 Diagnóstico Preditivo"
 with aba1:
     st.header("Análise Exploratória dos Dados")
     st.write("Visão geral do perfil dos pacientes na base de dados histórica.")
-
-
+    
     st.markdown("### 📌 Visão Geral (KPIs)")
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
     
@@ -42,7 +56,7 @@ with aba1:
     kpi3.metric(label="Peso Médio", value=f"{peso_medio} kg")
     kpi4.metric(label="Níveis de Diagnóstico", value=diagnosticos_distintos)
     
-    st.markdown("---") 
+    st.markdown("---")
     
     col1, col2 = st.columns(2)
     
@@ -72,32 +86,41 @@ with aba2:
         
         with col_a:
             st.subheader("Dados Biométricos")
-            gender = st.selectbox("Gênero (Gender)", ['Female', 'Male'])
-            age = st.number_input("Idade (Age)", min_value=14, max_value=100, value=25)
-            height = st.number_input("Altura em metros (Height)", min_value=1.0, max_value=2.5, value=1.70, step=0.01)
-            weight = st.number_input("Peso em kg (Weight)", min_value=30.0, max_value=200.0, value=70.0, step=0.1)
-            family_history = st.selectbox("Histórico Familiar de Sobrepeso?", ['yes', 'no'])
+            gender_pt = st.selectbox("Gênero", list(trad_genero.keys()))
+            age = st.number_input("Idade", min_value=14, max_value=100, value=25)
+            height = st.number_input("Altura em metros", min_value=1.0, max_value=2.5, value=1.70, step=0.01)
+            weight = st.number_input("Peso em kg", min_value=30.0, max_value=200.0, value=70.0, step=0.1)
+            family_history_pt = st.selectbox("Histórico Familiar de Sobrepeso?", list(trad_sim_nao.keys()))
             
         with col_b:
             st.subheader("Hábitos Alimentares")
-            favc = st.selectbox("Consome alimentos calóricos frequentemente? (FAVC)", ['yes', 'no'])
-            fcvc = st.slider("Frequência de vegetais nas refeições (FCVC)", 1, 3, 2)
-            ncp = st.slider("Número de refeições principais (NCP)", 1, 4, 3)
-            caec = st.selectbox("Come entre as refeições? (CAEC)", ['no', 'Sometimes', 'Frequently', 'Always'])
-            ch2o = st.slider("Consumo diário de água (CH2O)", 1, 3, 2)
+            favc_pt = st.selectbox("Consome alimentos calóricos frequentemente?", list(trad_sim_nao.keys()))
+            fcvc = st.slider("Frequência de vegetais nas refeições (1 a 3)", 1, 3, 2)
+            ncp = st.slider("Número de refeições principais", 1, 4, 3)
+            caec_pt = st.selectbox("Come entre as refeições?", list(trad_frequencia.keys()))
+            ch2o = st.slider("Consumo diário de água (1 a 3)", 1, 3, 2)
             
         with col_c:
             st.subheader("Estilo de Vida")
-            smoke = st.selectbox("Fumante? (SMOKE)", ['yes', 'no'])
-            scc = st.selectbox("Monitora calorias diárias? (SCC)", ['yes', 'no'])
-            faf = st.slider("Frequência de atividade física semanal (FAF)", 0, 3, 1)
-            tue = st.slider("Tempo diário em telas/dispositivos (TUE)", 0, 2, 1)
-            calc = st.selectbox("Consumo de álcool (CALC)", ['no', 'Sometimes', 'Frequently', 'Always'])
-            mtrans = st.selectbox("Meio de transporte (MTRANS)", ['Automobile', 'Motorbike', 'Bike', 'Public_Transportation', 'Walking'])
+            smoke_pt = st.selectbox("Fumante?", list(trad_sim_nao.keys()))
+            scc_pt = st.selectbox("Monitora calorias diárias?", list(trad_sim_nao.keys()))
+            faf = st.slider("Frequência de atividade física semanal (0 a 3)", 0, 3, 1)
+            tue = st.slider("Tempo diário em telas (0 a 2)", 0, 2, 1)
+            calc_pt = st.selectbox("Consumo de álcool", list(trad_frequencia.keys()))
+            mtrans_pt = st.selectbox("Meio de transporte principal", list(trad_transporte.keys()))
             
         submit_button = st.form_submit_button(label="Gerar Diagnóstico Preditivo")
 
     if submit_button:
+        gender = trad_genero[gender_pt]
+        family_history = trad_sim_nao[family_history_pt]
+        favc = trad_sim_nao[favc_pt]
+        caec = trad_frequencia[caec_pt]
+        smoke = trad_sim_nao[smoke_pt]
+        scc = trad_sim_nao[scc_pt]
+        calc = trad_frequencia[calc_pt]
+        mtrans = trad_transporte[mtrans_pt]
+
         dados_input = pd.DataFrame([[
             gender, age, height, weight, family_history, favc, fcvc, ncp, caec, 
             smoke, ch2o, scc, faf, tue, calc, mtrans
@@ -112,14 +135,16 @@ with aba2:
         dados_input[['Age', 'Height', 'Weight']] = scaler.transform(dados_input[['Age', 'Height', 'Weight']])
         
         previsao_codificada = modelo_rf.predict(dados_input)
+        diagnostico_ingles = le_target.inverse_transform(previsao_codificada)[0]
         
-        diagnostico = le_target.inverse_transform(previsao_codificada)[0]
+        diagnostico_final = trad_diagnostico.get(diagnostico_ingles, diagnostico_ingles)
         
         st.markdown("---")
         st.subheader("Resultado do Modelo:")
-        if "Normal" in diagnostico:
-            st.success(f"### O diagnóstico previsto é: **{diagnostico}**")
-        elif "Overweight" in diagnostico:
-            st.warning(f"### O diagnóstico previsto é: **{diagnostico}**")
+        
+        if "Normal" in diagnostico_final or "Abaixo" in diagnostico_final:
+            st.success(f"### O diagnóstico previsto é: **{diagnostico_final}**")
+        elif "Sobrepeso" in diagnostico_final:
+            st.warning(f"### O diagnóstico previsto é: **{diagnostico_final}**")
         else:
-            st.error(f"### O diagnóstico previsto é: **{diagnostico}**")
+            st.error(f"### O diagnóstico previsto é: **{diagnostico_final}**")
