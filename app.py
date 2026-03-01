@@ -27,6 +27,22 @@ aba1, aba2 = st.tabs(["📊 Dashboard Analítico", "🤖 Diagnóstico Preditivo"
 with aba1:
     st.header("Análise Exploratória dos Dados")
     st.write("Visão geral do perfil dos pacientes na base de dados histórica.")
+
+
+    st.markdown("### 📌 Visão Geral (KPIs)")
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    
+    total_pacientes = len(df)
+    idade_media = int(df['Age'].mean())
+    peso_medio = round(df['Weight'].mean(), 1)
+    diagnosticos_distintos = df['Obesity'].nunique()
+    
+    kpi1.metric(label="Total de Pacientes", value=total_pacientes)
+    kpi2.metric(label="Idade Média", value=f"{idade_media} anos")
+    kpi3.metric(label="Peso Médio", value=f"{peso_medio} kg")
+    kpi4.metric(label="Níveis de Diagnóstico", value=diagnosticos_distintos)
+    
+    st.markdown("---") 
     
     col1, col2 = st.columns(2)
     
